@@ -1,10 +1,29 @@
 {
-    "name": "your-app-name",
-    "version": "1.0.0",
-    "scripts": {
-      "start": "node index.js"
-    },
-    "engines": {
-      "node": "16.x"
-    }
+  "name": "jwt-in-action",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pgilewski/jwt-in-action.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/pgilewski/jwt-in-action/issues"
+  },
+  "homepage": "https://github.com/pgilewski/jwt-in-action#readme",
+  "engines": {
+    "node": "18.x"
+  },
+  "dependencies": {
+    "bcrypt": "^5.1.0",
+    "dotenv": "^16.1.0",
+    "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.0",
+    "mongoose": "^7.2.2"
   }
+}
