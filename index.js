@@ -134,7 +134,7 @@ app.get('/protected', authenticateToken, (req, res) => {
 
 // Serve the React app
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'client/build/index.html'));
+  res.sendFile(path.join(__dirname, 'client/dist/index.html'));
 });
 
 // Start the server
