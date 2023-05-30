@@ -18,9 +18,6 @@
     "url": "https://github.com/pgilewski/jwt-in-action/issues"
   },
   "homepage": "https://github.com/pgilewski/jwt-in-action#readme",
-  "engines": {
-    "node": "18.x"
-  },
   "dependencies": {
     "bcrypt": "^5.1.0",
     "body-parser": "*",
