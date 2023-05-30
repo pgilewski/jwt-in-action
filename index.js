@@ -5,6 +5,7 @@ const app = express();
 const cors = require('cors'); // Add CORS middleware for cross-origin requests
 const path = require('path'); // Add path module for serving static files
 const mongoose = require('mongoose');
+require('dotenv').config();
 
 function authenticateToken(req, res, next) {
     const authHeader = req.headers['authorization'];
@@ -141,6 +142,7 @@ app.get('*', (req, res) => {
 
 // Start the server
 const port = process.env.PORT || 3000;
+
 app.listen(port, () => {
   console.log(`Server is listening on port ${port}`);
 });
