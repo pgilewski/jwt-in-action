@@ -2,8 +2,8 @@ const express = require('express');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const app = express();
-const cors = require('cors'); // Add CORS middleware for cross-origin requests
-const path = require('path'); // Add path module for serving static files
+const cors = require('cors'); // Dodaj middleware CORS dla żądań międzydomenowych
+const path = require('path'); // Dodaj moduł path do serwowania plików statycznych
 const mongoose = require('mongoose');
 require('dotenv').config();
 
@@ -23,74 +23,73 @@ function authenticateToken(req, res, next) {
       req.user = user;
       next();
     });
-  }
-  
+}
 
 app.use(express.json());
-app.use(cors()); // Enable CORS for all routes
-app.use(express.static(path.join(__dirname, 'client/build'))); // Serve static files from React build folder
+app.use(cors());
+app.use(express.static(path.join(__dirname, 'client/build'))); // Serwuj pliki statyczne z folderu build Reacta
 
-// Connection URI
+// URI połączenia z bazą danych
 const uri = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.98hdmyg.mongodb.net/?retryWrites=true&w=majority`;
 
-// Connect to the MongoDB server
+// Serwer MongoDB
 mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => {
-    console.log('Connected to the database');
+    console.log('Połączono z bazą danych');
   })
   .catch((error) => {
-    console.error('Failed to connect to the database:', error);
+    console.error('Błąd podczas łączenia z bazą danych:', error);
   });
 
-// Define a user schema
+// Schemat użytkownika
 const userSchema = new mongoose.Schema({
     name: { type: String, required: true },
     password: { type: String, required: true }
-  });
-  
-// Create a user model
+});
+
+// Model użytkownika
 const User = mongoose.model('User', userSchema);
-  
-// A basic user database
-const users = [];
-// In a real application, you should store refresh tokens in a database
+
+
+// W rzeczywistej aplikacji powinieneś przechowywać tokeny odświeżające w bazie danych
 let refreshTokens = [];
-// Signup Route
+
+// Trasa rejestracji
 app.post('/signup', async (req, res) => {
     try {
       const hashedPassword = await bcrypt.hash(req.body.password, 10);
       const user = new User({ name: req.body.name, password: hashedPassword });
   
-      // Save the user to the database
+      // Zapisz użytkownika w bazie danych
       await user.save();
   
       res.status(201).json(user);
     } catch (error) {
-      console.error('Failed to create user:', error);
+      console.error('Błąd podczas tworzenia użytkownika:', error);
       res.status(500).send();
     }
-  });
-  
-// Login Route
+});
+
+// Trasa logowania
 app.post('/login', async (req, res) => {
-try {
+  try {
     const user = await User.findOne({ name: req.body.name });
     if (!user) {
-    return res.status(400).send('Cannot find user');
+      return res.status(400).send('Nie można znaleźć użytkownika');
     }
 
     if (await bcrypt.compare(req.body.password, user.password)) {
-    const accessToken = generateAccessToken(user);
-    const refreshToken = jwt.sign(user.toJSON(), process.env.REFRESH_TOKEN_SECRET);
-    refreshTokens.push(refreshToken);
-    res.json({ accessToken: accessToken, refreshToken: refreshToken });
+      const accessToken = generateAccessToken(user);
+      const refreshToken = jwt.sign(user.toJSON(), process.env.REFRESH_TOKEN_SECRET);
+      refreshTokens.push(refreshToken);
+      res.json({ accessToken: accessToken, refreshToken: refreshToken });
     } else {
-    res.send('Not Allowed');
+      res.send('Nieautoryzowany');
     }
-} catch (error) {
-    console.error('Failed to login:', error);
+  } catch (error) {
+    console.error('Błąd logowania:', error);
     res.status(500).send();
-}
+  }
 });
 
 app.post('/token', (req, res) => {
@@ -110,7 +109,7 @@ app.delete('/logout', (req, res) => {
   res.sendStatus(204);
 });
 
-// Middleware to Authenticate
+// Middleware do uwierzytelniania
 function authenticateToken(req, res, next) {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
@@ -125,31 +124,32 @@ function authenticateToken(req, res, next) {
 }
 
 function generateAccessToken(user) {
-  return jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '15m' });
+  return jwt.sign(user.toJSON(), process.env.ACCESS_TOKEN_SECRET, { expiresIn: '15m' });
 }
 
-// Protected Route
+// Trasa chroniona
 app.get('/protected', authenticateToken, (req, res) => {
-  res.json({ title: 'This is protected data', user: req.user });
+  res.json({ title: 'To są chronione dane', user: req.user });
 });
 
-// serve up production assets
+// Serwuj pliki produkcyjne
 app.use(express.static('client/dist'));
-// Serve the React app
+
+// Serwuj aplikację Reacta
 app.get('*', (req, res) => {
   res.sendFile(path.resolve(__dirname, 'client', 'dist', 'index.html'));
 });
 
-// Start the server
+// Uruchom serwer
 const port = process.env.PORT || 3000;
 
 app.listen(port, () => {
-  console.log(`Server is listening on port ${port}`);
+  console.log(`Serwer nasłuchuje na porcie ${port}`);
 });
 
 process.on('SIGINT', () => {
-    mongoose.connection.close(() => {
-      console.log('Database connection closed');
-      process.exit();
-    });
+  mongoose.connection.close(() => {
+    console.log('Zamknięto połączenie z bazą danych');
+    process.exit();
   });
+});
